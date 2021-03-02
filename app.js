@@ -1,8 +1,29 @@
+const port = process.env.PORT || 3000;
+const mongoUser = process.env.MONGOUSER || null;
+const mongoPass = process.env.MONGOPASS || null;
+const mongoHost = process.env.MONGOHOST || 'localhost';
+const mongoPort = process.env.MONGOPORT || 27017;
+const mongoDatabase = process.env.MONGODATABASE || 'movies';
+
+let mongoUrl = 'mongodb://' + mongoHost + ':' + mongoPort + '/movies';
+if(mongoUser !== null) {
+    mongoUrl = 
+        'mongodb+srv://' 
+        + mongoUser + ':' + mongoPass 
+        + '@' + mongoHost 
+        + '/' + mongoDatabase + '?retryWrites=true&w=majority';
+} 
 const express = require('express');
 const axios = require('axios');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const db = mongoose.connect('mongodb://localhost/movies');
+
+const db = mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true });
+
+db.catch(function(error){
+    console.log('DB connection error', error);
+    process.exit(1);
+});
 
 const app = express();
 
@@ -103,6 +124,6 @@ app.get("/show/:id/comments", async function(req, res) {
     });
 });
 
-app.listen(3000, () => {
+app.listen(port, () => {
     console.log('Up and running on port 3000!');
 });
